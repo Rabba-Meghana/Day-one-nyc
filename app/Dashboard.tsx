@@ -86,29 +86,42 @@ export default function Dashboard({ data, centerData }: { data: ContractPayload;
   return <main className="app-shell">
     <header className="topbar">
       <div className="brand"><div className="brand-mark">01</div><div><strong>Day One Pay</strong><span>NYC child and education service contracts</span></div></div>
+      <nav className="icon-nav" aria-label="Primary">
+        <button className={tab === "contracts" ? "active" : ""} onClick={() => setTab("contracts")}><AlertTriangle/><span>Risk desk</span></button>
+        <button className={tab === "centers" ? "active" : ""} onClick={() => { setTab("centers"); if (!centers) setTimeout(loadCenters, 0); }}><Building2/><span>Licensed sites</span></button>
+        <button className={tab === "policy" ? "active" : ""} onClick={() => setTab("policy")}><ShieldCheck/><span>Guarantee</span></button>
+      </nav>
       <div className="source-pill"><span className="live-dot" /> OFFICIAL SNAPSHOT · {retrieved}</div>
     </header>
-    <div className="nav-row">
-      <nav aria-label="Primary">
-        <button className={tab === "contracts" ? "active" : ""} onClick={() => setTab("contracts")}>Risk desk</button>
-        <button className={tab === "centers" ? "active" : ""} onClick={() => { setTab("centers"); if (!centers) setTimeout(loadCenters, 0); }}>Licensed sites</button>
-        <button className={tab === "policy" ? "active" : ""} onClick={() => setTab("policy")}>Guarantee rule</button>
-      </nav>
-      <a href="https://a0333-passportpublic.nyc.gov/contracts.html" target="_blank" rel="noreferrer">Open PASSPort <ExternalLink size={14}/></a>
-    </div>
 
     {tab === "contracts" && <>
-      <section className="masthead">
-        <div><p className="eyebrow">FIRST-PAYMENT EARLY WARNING</p><h1>Find the contracts where work may begin before registration.</h1></div>
-        <div className="policy-stamp"><ShieldCheck/><div><strong>{critical.length} contracts meet the trigger</strong><span>Proposed rule: started + not registered</span></div></div>
+      <section className="city-stage">
+        <div className="city-stage-shade" />
+        <div className="hero-copy">
+          <p className="eyebrow">NYC FIRST-PAYMENT WATCH</p>
+          <h1>The city said <em>start.</em><br/>The paperwork said <em>wait.</em></h1>
+          <p className="hero-lede">A live evidence desk for child and education contracts caught between service delivery and registration.</p>
+          <div className="hero-actions">
+            <button className="glow-button" onClick={() => document.getElementById("risk-desk")?.scrollIntoView({ behavior: "smooth" })}>Open the risk desk <ArrowRight/></button>
+            <a href="https://a0333-passportpublic.nyc.gov/contracts.html" target="_blank" rel="noreferrer">Verify in PASSPort <ExternalLink/></a>
+          </div>
+        </div>
+        <aside className="hero-signal" aria-label="Active guarantee signal">
+          <div className="signal-head"><span>Guarantee signal</span><ShieldCheck/></div>
+          <strong>{critical.length}</strong>
+          <h2>contracts meet the trigger</h2>
+          <p>Published start date passed. Registration date still absent.</p>
+          <div className="signal-line"><span>PROPOSED RULE</span><b>STARTED + NOT REGISTERED</b></div>
+        </aside>
+        <section className="metrics" aria-label="Risk summary">
+          <Metric icon={<AlertTriangle/>} label="Active trigger" value={String(critical.length)} note="Started, not registered" tone="danger" />
+          <Metric icon={<CircleDollarSign/>} label="Value in view" value={compactMoney.format(atRiskValue)} note="Current or award amount" tone="ink" />
+          <Metric icon={<Clock3/>} label="Oldest open clock" value={`${oldest} days`} note="Since contract start" tone="warning" />
+          <Metric icon={<FileCheck2/>} label="Registered late" value={registered.length ? `${Math.round(lateRegistered.length / registered.length * 100)}%` : "—"} note={`${lateRegistered.length} of ${registered.length} dated records`} tone="blue" />
+        </section>
       </section>
-      <section className="metrics" aria-label="Risk summary">
-        <Metric icon={<AlertTriangle/>} label="Active trigger" value={String(critical.length)} note="Started, not registered" tone="danger" />
-        <Metric icon={<CircleDollarSign/>} label="Disclosed contract value" value={compactMoney.format(atRiskValue)} note="Current or award amount" tone="ink" />
-        <Metric icon={<Clock3/>} label="Oldest open clock" value={`${oldest} days`} note="Since contract start" tone="warning" />
-        <Metric icon={<FileCheck2/>} label="Registered late" value={registered.length ? `${Math.round(lateRegistered.length / registered.length * 100)}%` : "—"} note={`${lateRegistered.length} of ${registered.length} dated records`} tone="blue" />
-      </section>
-      <section className="workbench">
+      <section className="workbench" id="risk-desk">
+        <div className="desk-title"><div><p className="eyebrow">CONTRACT EVIDENCE</p><h2>Follow the money clock</h2></div><span>{data.records.length} filtered records from {data.source.originalRecordCount.toLocaleString()} checked</span></div>
         <div className="filters">
           <label className="search"><Search size={18}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search vendor, title, EPIN or contract ID" /></label>
           <select aria-label="Risk filter" value={risk} onChange={e => setRisk(e.target.value)}>
